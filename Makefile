@@ -42,12 +42,12 @@ BUILD_FLAGS := -tags "$(build_tags_comma_sep)" -ldflags '$(ldflags)'
 all: build install
 
 install: go.sum
-	@echo "--> Installing aurad"
+	@echo "--> Installing aurad-psql"
 	@go install -mod=readonly $(BUILD_FLAGS) ./cmd/aurad
 
 build: go.sum
-	@echo "--> Build aurad"
-	go build -mod=readonly $(BUILD_FLAGS) -o ./build/aurad ./cmd/aurad
+	@echo "--> Build aurad-psql"
+	go build -mod=readonly $(BUILD_FLAGS) -o ./build/aurad-psql ./cmd/aurad
 
 go.sum: go.mod
 	@echo "--> Ensure dependencies have not been modified"
