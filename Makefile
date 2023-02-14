@@ -17,23 +17,37 @@ endif
 SDK_PACK := $(shell go list -m github.com/cosmos/cosmos-sdk | sed  's/ /\@/g')
 TM_VERSION := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
 
+build_tags = netgo
+build_tags += $(BUILD_TAGS)
+build_tags := $(strip $(build_tags))
+
+whitespace :=
+empty = $(whitespace) $(whitespace)
+comma := ,
+build_tags_comma_sep := $(subst $(empty),$(comma),$(build_tags))
+
 ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=aura \
 	-X github.com/cosmos/cosmos-sdk/version.AppName=aurad \
 	-X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 	-X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
-	-X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_VERSION)
+	-X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_VERSION) \
+	-X github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)
 
-BUILD_FLAGS := -ldflags '$(ldflags)'
+# ldflags += -extldflags "-lm -lstdc++ -static"
+ldflags += -w -s
+ldflags += -linkmode "external" -extldflags "-Wl,-z,muldefs -L/lib -lwasmvm_muslc -static"
+
+BUILD_FLAGS := -tags "$(build_tags_comma_sep)" -ldflags '$(ldflags)'
 
 all: build install
 
 install: go.sum
-	@echo "--> Installing aurad"
+	@echo "--> Installing aurad-psql"
 	@go install -mod=readonly $(BUILD_FLAGS) ./cmd/aurad
 
 build: go.sum
-	@echo "--> Build aurad"
-	@go build -mod=readonly $(BUILD_FLAGS) -o ./build/aurad ./cmd/aurad
+	@echo "--> Build aurad-psql"
+	go build -mod=readonly $(BUILD_FLAGS) -o ./build/aurad-psql ./cmd/aurad
 
 go.sum: go.mod
 	@echo "--> Ensure dependencies have not been modified"

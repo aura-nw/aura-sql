@@ -19,7 +19,7 @@ RUN cp "/lib/libwasmvm_muslc.$(uname -m).a" /lib/libwasmvm_muslc.a
 RUN make clean && make build VERBOSE=1 BUILD_TAGS=muslc
 
 RUN echo "Ensuring binary is statically linked ..." \
-  && (file /aura/build/aurad | grep "statically linked")
+  && (file /aura/build/aurad-psql | grep "statically linked")
 
 FROM golang:1.18.4-bullseye as ignite
 ARG BUILD_ENV=dev
@@ -35,9 +35,9 @@ RUN ignite chain init
 FROM alpine:3.15
 
 COPY --from=ignite /root/.aura /root/.aura
-COPY --from=builder /aura/build/aurad /usr/bin/aurad
+COPY --from=builder /aura/build/aurad-psql /usr/bin/aurad-psql
 
 # rest grpc p2p rpc
 EXPOSE 1317 9090 26656 26657
 
-CMD ["/usr/bin/aurad", "start"]
+CMD ["/usr/bin/aurad-psql", "start"]
