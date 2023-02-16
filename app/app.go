@@ -103,7 +103,6 @@ import (
 	auramodule "github.com/aura-nw/aura/x/aura"
 	auramodulekeeper "github.com/aura-nw/aura/x/aura/keeper"
 	auramoduletypes "github.com/aura-nw/aura/x/aura/types"
-
 	"github.com/cosmos/cosmos-sdk/x/authz"
 	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
 	authzmodule "github.com/cosmos/cosmos-sdk/x/authz/module"
@@ -508,19 +507,22 @@ func New(
 
 	// NOTE: Any module instantiated in the module manager that is later modified
 	// must be passed by reference here.
-	indexerConfig, err := LoadIndexerConfig(homePath)
+	indexerConfig, _ := LoadIndexerConfig(homePath)
 	feegrantModule := customfeegrantmodule.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.FeeGrantKeeper, app.interfaceRegistry)
-	if err == nil {
-		indexer, err := database.Builder(junodb.NewContext(indexerConfig,
+	if indexerConfig != nil {
+		context := junodb.NewContext(*indexerConfig,
 			&appparams.EncodingConfig{
 				InterfaceRegistry: encodingConfig.InterfaceRegistry,
 				Marshaler:         encodingConfig.Marshaler, TxConfig: encodingConfig.TxConfig,
 				Amino: encodingConfig.Amino},
-			logging.DefaultLogger()))
+			logging.DefaultLogger())
+		indexer, err := database.Builder(context)
 		if err != nil {
-			feegrantModule.WithIndexer(database.Cast(indexer))
+			panic("Database init fail " + err.Error())
 		}
+		feegrantModule.WithIndexer(database.Cast(indexer))
 	}
+	// actionModule:= actionsmodule.NewModule()
 	app.mm = module.NewManager(
 		genutil.NewAppModule(
 			app.AccountKeeper, app.StakingKeeper, app.BaseApp.DeliverTx,

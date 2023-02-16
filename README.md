@@ -1,6 +1,6 @@
 # Aura
-[![go-test](https://github.com/aura-nw/aura/actions/workflows/test.yml/badge.svg)](https://github.com/aura-nw/aura/actions/workflows/test.yml)
-[![golangci-lint](https://github.com/aura-nw/aura/actions/workflows/golangci-lint.yml/badge.svg)](https://github.com/aura-nw/aura/actions/workflows/golangci-lint.yml)
+[![go-test](https://github.com/aura-nw/aura/hasura/workflows/test.yml/badge.svg)](https://github.com/aura-nw/aura/hasura/workflows/test.yml)
+[![golangci-lint](https://github.com/aura-nw/aura/hasura/workflows/golangci-lint.yml/badge.svg)](https://github.com/aura-nw/aura/hasura/workflows/golangci-lint.yml)
 
 This repository contains source code for Aurad (Aura Daemon). Aurad binary is the official client for Aura Network. Aurad is built using Cosmos SDK
 
@@ -50,10 +50,27 @@ Collect the gentx to genesis file:
 aurad collect-gentxs
 ```
 
+### Config indexer
+If you want to run your aura app with indexer psql, let copy indexer.toml to your home config folder (default: ~/.aura/config)
+Then, start psql docker (make sure all configs psql in indexer.toml are match for docker-compose file)
+```
+docker-compose up
+```
 ### Run a node
 ```
 aurad start 
 ```
+
+### Run with Hasura
+1. You need to create hasura.yaml in your homepath/config (example: [a relative link](./config/hasura.yaml))
+2. Run metadata for hasura:
+docker exec hasura_aura hasura metadata apply (after docker-compose up)
+3. Start hasura handler
+```
+aurad hasura
+```
+
+### 
 ## Setup testnet using testnetCmd
 
 ## Contribution
